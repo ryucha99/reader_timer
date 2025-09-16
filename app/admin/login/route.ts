@@ -1,5 +1,7 @@
 // app/admin/login/route.ts
-import { NextResponse } from 'next/server';
+
+import { NextRequest, NextResponse } from 'next/server';
+
 import { cookies } from 'next/headers';
 
 export const runtime = 'nodejs';
@@ -28,9 +30,10 @@ export async function POST(request: Request) {
   return res;
 }
 
+
 // 로그인 상태 확인: GET /admin/login
-export async function GET() {
-  const isAdmin = cookies().get('admin')?.value === '1';
+export async function GET(req: NextRequest) {
+  const isAdmin = req.cookies.get('admin')?.value === '1';
   return NextResponse.json({ authed: isAdmin });
 }
 
