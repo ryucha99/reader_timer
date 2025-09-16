@@ -62,7 +62,8 @@ export default function AdminPage() {
     (async () => {
       try {
         setAuthChecking(true);
-        const data = await fetchJSON<{ authed: boolean }>('/api/admin/me');
+        //const data = await fetchJSON<{ authed: boolean }>('/api/admin/me');
+        const data = await fetchJSON<{ authed: boolean }>('/admin/login');
         setAuthed(!!data.authed);
       } catch {
         setAuthed(false);
@@ -74,7 +75,8 @@ export default function AdminPage() {
 
   async function login() {
     try {
-      const res = await fetch('/api/admin/login', {
+      //const res = await fetch('/api/admin/login', {
+      const res = await fetch('/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         cache: 'no-store',
@@ -89,7 +91,10 @@ export default function AdminPage() {
       }
 
       // 쿠키가 실제로 저장됐는지 즉시 확인
-      const me = await fetch('/api/admin/me', { cache: 'no-store', credentials: 'same-origin' });
+     // const me = await fetch('/api/admin/me', { cache: 'no-store', credentials: 'same-origin' });
+      //const data = await me.json().catch(() => ({ authed: false }));
+
+      const me = await fetch('/admin/login', { cache: 'no-store', credentials: 'same-origin' });
       const data = await me.json().catch(() => ({ authed: false }));
 
       if (!data.authed) {
@@ -109,7 +114,8 @@ export default function AdminPage() {
 
   async function logout() {
     try {
-      await fetch('/api/admin/logout', { method: 'POST', cache: 'no-store' });
+      //await fetch('/api/admin/logout', { method: 'POST', cache: 'no-store' });
+      await fetch('/admin/logout', { method: 'POST', cache: 'no-store' });
     } catch {
       /* noop */
     } finally {
