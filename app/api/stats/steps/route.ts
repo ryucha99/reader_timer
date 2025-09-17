@@ -1,25 +1,41 @@
-// app/api/stats/steps/route.ts
-import db from '@/lib/db';
+import { NextResponse } from 'next/server';
+import pool from '@/lib/db';
+
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+type Step = {
+  id: number; user: string; date: string; book: string;
+  startPage: number; endPage: number; pagesRead: number; timestamp: number;
+};
+
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const user = searchParams.get('user');
-  const datesParam = searchParams.get('dates');
-  const book = searchParams.get('book');
-  if (!user || !datesParam || !book) return new Response('Missing params', { status: 400 });
+  const url = new URL(req.url);
+  const user = url.searchParams.get('user');
+  const dates = (url.searchParams.get('dates') ?? '')
+    .split(',').map(s => s.trim()).filter(Boolean);
+  const book = url.searchParams.get('book');
 
-  const dates = datesParam.split(',').map(s => s.trim()).filter(Boolean);
-  if (dates.length === 0) return Response.json([]);
+  if (!user || dates.length === 0 || !book) return new NextResponse('missing params', { status: 400 });
 
-  const placeholders = dates.map(() => '?').join(',');
-  const rows = db.prepare(
-    `SELECT id, user, date, book, startPage, endPage, pagesRead, timestamp
-     FROM steps
-     WHERE user = ? AND book = ? AND date IN (${placeholders})
-     ORDER BY timestamp ASC`
-  ).all(user, book, ...dates);
+  const { rows } = await pool.query(
+    `SELECT id, user_name, date, book, start_page, end_page, pages_read, ts
+       FROM steps
+      WHERE user_name = $1 AND date = ANY($2) AND book = $3
+      ORDER BY ts ASC`,
+    [user, dates, book]
+  );
 
-  return Response.json(rows);
+  const data: Step[] = rows.map(r => ({
+    id: Number(r.id),
+    user: String(r.user_name),
+    date: String(r.date),
+    book: String(r.book),
+    startPage: Number(r.start_page),
+    endPage: Number(r.end_page),
+    pagesRead: Number(r.pages_read),
+    timestamp: Number(r.ts),
+  }));
+
+  return NextResponse.json(data);
 }
