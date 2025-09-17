@@ -1,8 +1,14 @@
+// app/api/steps/route.ts
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+function getErrorMessage(err: unknown) {
+  if (err instanceof Error) return err.message;
+  try { return JSON.stringify(err); } catch { return String(err); }
+}
 
 export async function POST(req: Request) {
   try {
@@ -22,8 +28,8 @@ export async function POST(req: Request) {
     );
 
     return NextResponse.json({ ok: true });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error('POST /api/steps error:', e);
-    return new NextResponse(e?.message ?? 'server error', { status: 500 });
+    return new NextResponse(getErrorMessage(e), { status: 500 });
   }
 }

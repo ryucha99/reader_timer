@@ -1,16 +1,14 @@
-// lib/db.ts  (싱글톤 풀)
+// lib/db.ts
 import { Pool } from 'pg';
 
 declare global {
-  // eslint-disable-next-line no-var
-  var __pgPool__: Pool | undefined;
+  var __pgPool__: Pool | undefined; // <- 이 줄은 유지 (전역 선언)
 }
 
 const pool =
   global.__pgPool__ ??
   new Pool({
-    connectionString: process.env.DATABASE_URL, // Neon의 (pooled) URL
-    // ssl: { rejectUnauthorized: false }, // 필요 시
+    connectionString: process.env.DATABASE_URL,
   });
 
 if (process.env.NODE_ENV !== 'production') {
