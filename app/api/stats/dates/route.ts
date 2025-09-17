@@ -9,9 +9,11 @@ export async function GET(req: Request) {
   const user = url.searchParams.get('user');
   if (!user) return new NextResponse('missing user', { status: 400 });
 
-  const { rows } = await pool.query(
+  // app/api/stats/dates/route.ts
+  const { rows } = await pool.query<{ date: string }>(
     `SELECT DISTINCT date FROM steps WHERE user_name = $1 ORDER BY date ASC`,
     [user]
   );
-  return NextResponse.json(rows.map(r => r.date as string));
+  return NextResponse.json(rows.map(({ date }) => date));
+
 }

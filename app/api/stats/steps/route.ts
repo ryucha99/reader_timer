@@ -18,13 +18,18 @@ export async function GET(req: Request) {
 
   if (!user || dates.length === 0 || !book) return new NextResponse('missing params', { status: 400 });
 
-  const { rows } = await pool.query(
+  type Row = {
+    id: number; user_name: string; date: string; book: string;
+    start_page: number; end_page: number; pages_read: number; ts: number;
+  };
+  const { rows } = await pool.query<Row>(
     `SELECT id, user_name, date, book, start_page, end_page, pages_read, ts
-       FROM steps
+      FROM steps
       WHERE user_name = $1 AND date = ANY($2) AND book = $3
       ORDER BY ts ASC`,
     [user, dates, book]
   );
+
 
   const data: Step[] = rows.map(r => ({
     id: Number(r.id),
